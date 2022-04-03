@@ -1,81 +1,55 @@
+//variables to identify specific objects
 var containerEl = $(".container")
-var times = ['9AM', '10AM', '11AM', '12AM', '1PM', '2PM', '3PM', '4PM', '5PM']
-
 var dateEl = $('#currentDay')
-var tasks = {};
-//console.log(descriptionEl.length);
-//console.log(descriptionEl[0])
-//console.log(descriptionEl[1])
-//console.log(descriptionEl[2])
+var descriptionEl = $('.description')
 
+//array to store task text
+var tasks = [
+    (9, ''),
+    (10, ''),
+    (11, ''),
+    (12, ''),
+    (13, ''),
+    (14, ''),
+    (15, ''),
+    (16, ''),
+    (17, '')
+]
+
+
+//function to check current time and highlight tasks accordingly 
 var auditTime = function () {
     var currentHour = moment().hour();
     var descriptionEl = $('.description')
-    console.log(currentHour);
 
+    //for loop to add classes based on time
     for (i = 0; i < descriptionEl.length; i++) {
         var currentTask = descriptionEl[i];
-        //console.log(currentTask);
+
 
         if (descriptionEl[i].dataset.time < currentHour) {
-            // console.log("PAST")
+
             $(currentTask).addClass('past')
         }
         else if (descriptionEl[i].dataset.time > currentHour) {
-            // console.log("Future")
+
             $(currentTask).addClass('future')
         }
         else if (descriptionEl[i].dataset.time = currentHour) {
-            // console.log('Present')
+
             $(currentTask).addClass('present')
         }
 
     }
 }
 
+//function to set Current day and add to top of Page
 var setDay = function () {
     var rightNow = moment().format("MMMM Do, YYYY");
     $(dateEl).text(rightNow)
 }
 
-
-
-
-$(".task-container").on("blur", "textarea", function () {
-    //gets current elements id
-    //console.log($(this).parent().attr("id"));
-
-    //get the textarea's current value/text
-    var text = $(this)
-        .val()
-        .trim();
-    console.log(text);
-
-    // get the parent ul's id attribute
-    var currentID = $(this)
-        .parent()
-        .attr("id")
-
-    console.log(currentID);
-    // get the task's position in the list of other li elements
-    // var index = $(this)
-    //     .closest(".description")
-    //     .index();
-
-    //tasks[status][index].text = text;
-    // saveTasks();
-
-    // recreate p element
-    var taskP = $("<div>")
-        .addClass("description col-9")
-        .text(text)
-        .attr('data-time', currentID)
-
-    // replace textarea with p element
-    $(this).replaceWith(taskP);
-    auditTime();
-});
-
+//click listener to allow editing of task text field
 $("div").on("click", '.description', function () {
     var text = $(this)
         .text()
@@ -89,43 +63,91 @@ $("div").on("click", '.description', function () {
     textInput.trigger("focus");
 });
 
-// $(".saveBtn").on('click'), function () {
-//     $('description').text()
-// }
-
-// var saveTasks = function() {
-//     localStorage.setItem("tasks", JSON.stringify(tasks));
-//   };
-
+//blur listener to remove text area and set a div 
+$(".task-container").on("blur", "textarea", function () {
+    //get the textarea's current value/text
+    var text = $(this)
+        .val()
+        .trim();
 
 
+    // get the parent's id attribute
+    var currentID = $(this)
+        .parent()
+        .attr("id")
+
+    // recreate div element
+    var taskP = $("<div>")
+        .addClass("description col-9")
+        .text(text)
+        .attr('data-time', currentID)
+
+
+    // replace textarea with div element
+    $(this).replaceWith(taskP);
+    auditTime();
+});
+
+//function to save task when save button is clicked
+$('.saveBtn').click(function () {
+    var currentID = $(this)
+        .parent()
+        .attr("id")
+
+    var parent = $(this).closest(".task-container").children('.description')
+    var innerText = $(this).closest(".task-container").children('.description').text();
+
+    console.log(parent)
+    console.log("innerText of element " + currentID + " is " + innerText)
+
+    console.log('Save Button Clicked' + currentID)
+
+    tasks.splice(currentID, 1, innerText);
+
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+
+})
+
+//function to load tasks from localStorage and set the task text
+var loadTasks = function () {
+    tasks = JSON.parse(localStorage.getItem("tasks"));
+
+    //if there are no tasks in localStorage create empty array
+    if (!tasks) {
+        tasks = [
+            (9, ''),
+            (10, ''),
+            (11, ''),
+            (12, ''),
+            (13, ''),
+            (14, ''),
+            (15, ''),
+            (16, ''),
+            (17, '')
+        ]
+    }
+
+    //append saved task data to description field 
+    $("#0").children('.description').text(tasks[0]);
+    $("#1").children('.description').text(tasks[1]);
+    $("#2").children('.description').text(tasks[2]);
+    $("#3").children('.description').text(tasks[3]);
+    $("#4").children('.description').text(tasks[4]);
+    $("#5").children('.description').text(tasks[5]);
+    $("#6").children('.description').text(tasks[6]);
+    $("#7").children('.description').text(tasks[7]);
+    $("#8").children('.description').text(tasks[8]);
+
+};
 
 auditTime();
 setDay();
+loadTasks();
 
-//make tasks editable
-//
-
-//      DONE
-// GIVEN I am using a daily planner to create a schedule
-// WHEN I open the planner
-// THEN the current day is displayed at the top of the calendar
-
-// WHEN I scroll down
-// THEN I am presented with time blocks for standard business hours
-
-// WHEN I view the time blocks for that day
-// THEN each time block is color-coded to indicate whether it is in the past, present, or future
-
-
-
-// WHEN I click into a time block
-// THEN I can enter an event
-
-
-//      TO DO
-// WHEN I click the save button for that time block
-// THEN the text for that event is saved in local storage
-
-// WHEN I refresh the page
-// THEN the saved events persist
+//audits the time and sets the day every 5 minutes 
+setInterval(function () {
+    auditTime();
+    setDay();
+}, 300000);
